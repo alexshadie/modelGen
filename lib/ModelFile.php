@@ -19,6 +19,7 @@ class ModelFile extends CommonFile
         $content[] = "";
         $content[] = $this->getBuild();
         $content[] = $this->getGetters();
+        $content[] = $this->getEquals();
 
         $content[] = "}";
         $content[] = "";
@@ -83,6 +84,25 @@ class ModelFile extends CommonFile
             S . "{\n" .
             S . S . "return new {$this->name}Builder();\n" .
             S . "}\n";
+    }
+
+    public function getEquals()
+    {
+        $comparison = [];
+
+        foreach ($this->fields as $field => $type) {
+            $comparison[] = S.S.S."\$this->get" . ucfirst($field) . "() === \$src->get" . ucfirst($field) . "() ";
+        }
+        return
+                "\n" .
+                S . "public function equals(?{$this->name} \$src): bool\n" .
+                S . "{\n" .
+                S.S."if (is_null(\$src)) {\n" .
+                S.S.S."return false;\n" .
+                S.S."}\n" .
+                S.S."return\n" . join("&&\n", $comparison) . "\n" .
+                S.S.";\n" .
+                S . "}";
     }
 
     public function getGetters()

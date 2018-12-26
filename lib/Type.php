@@ -4,7 +4,7 @@ class Type
 {
     private $type;
     private $nullable;
-    private $testValues = [];
+    private static $testValues = [];
 
     public function __construct(string $type)
     {
@@ -46,7 +46,7 @@ class Type
         $s .= "    }";
 
         if ($this->type == 'timestamp' && strpos(ucfirst($field), 'Ts') !== 'false') {
-            $s .= "\n    public function get" . str_replace("Ts", "Time", ucfirst($field)) . "()";
+            $s .= "\n\n    public function get" . str_replace("Ts", "Time", ucfirst($field)) . "()";
             $s .= ": string";
             $s .= "\n    {\n";
             $s .= "        return \core\Utils::date(\$this->{$field});\n";
@@ -135,9 +135,9 @@ class Type
         return camelCaseToUnderscores($field) . " " . $dt . ($this->nullable ? "" : " NOT NULL");
     }
 
-    public function resetTestValues()
+    public static function resetTestValues()
     {
-        $this->testValues = [];
+        self::$testValues = [];
     }
 
     public function getDefaultValue()
@@ -163,21 +163,22 @@ class Type
         }
     }
 
-    public function getTestValue($idx)
+    public static function getTestValue($type, $idx)
     {
-        if (isset($this->testValues[$idx])) {
-            return $this->testValues[$idx];
+        if (isset(self::$testValues[$idx])) {
+            return self::$testValues[$idx];
         }
 
-        switch ($this->type) {
+        $t = new Type($type);
+        switch ($t->type) {
             case 'int':
-                return $this->testValues[$idx] = rand(1, 100);
+                return self::$testValues[$idx] = rand(1, 100);
 
             case 'timestamp':
-                return $this->testValues[$idx] = 30000000 + rand(1, 1000) * 10;
+                return self::$testValues[$idx] = 30000000 + rand(1, 1000) * 10;
 
             case 'string':
-                return $this->testValues[$idx] = '"' . substr(
+                return self::$testValues[$idx] = '"' . substr(
                         str_shuffle(
                             str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
                         ),
@@ -186,35 +187,36 @@ class Type
                     ) . '"';
 
             case 'float':
-                return $this->testValues[$idx] = rand(1, 100) + 0.5;
+                return self::$testValues[$idx] = rand(1, 100) + 0.5;
 
             case 'bool':
-                return $this->testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
+                return self::$testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
 
             default:
-                throw new Exception("Invalid datatype " . $this->type);
+                throw new Exception("Invalid datatype " . $type);
         }
     }
 
-    public function getTestValueNull($idx)
+    public static function getTestValueNull($type, $idx)
     {
-        if (isset($this->testValues[$idx])) {
-            return $this->testValues[$idx];
+        if (isset(self::$testValues[$idx])) {
+            return self::$testValues[$idx];
         }
 
-        if ($this->nullable) {
-            return $this->testValues[$idx] = 'null';
+        $t = new Type($type);
+        if ($t->nullable) {
+            return self::$testValues[$idx] = 'null';
         }
 
-        switch ($this->type) {
+        switch ($t->type) {
             case 'int':
-                return $this->testValues[$idx] = rand(1, 100);
+                return self::$testValues[$idx] = rand(1, 100);
 
             case 'timestamp':
-                return $this->testValues[$idx] = 30000000 + rand(1, 1000) * 10;
+                return self::$testValues[$idx] = 30000000 + rand(1, 1000) * 10;
 
             case 'string':
-                return $this->testValues[$idx] = '"' . substr(
+                return self::$testValues[$idx] = '"' . substr(
                         str_shuffle(
                             str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
                         ),
@@ -223,36 +225,37 @@ class Type
                     ) . '"';
 
             case 'float':
-                return $this->testValues[$idx] = rand(1, 100) + 0.5;
+                return self::$testValues[$idx] = rand(1, 100) + 0.5;
 
             case 'bool':
-                return $this->testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
+                return self::$testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
 
             default:
-                throw new Exception("Invalid datatype " . $this->type);
+                throw new Exception("Invalid datatype " . $type);
         }
     }
 
-    public function getTestValueTs($idx, $intForTs)
+    public static function getTestValueTs($type, $idx, $intForTs)
     {
-        if (isset($this->testValues[$idx])) {
-            if ($this->type != 'timestamp') {
-                return $this->testValues[$idx];
+        $t = new Type($type);
+        if (isset(self::$testValues[$idx])) {
+            if ($t->type != 'timestamp') {
+                return self::$testValues[$idx];
             } else {
-                return $intForTs ? $this->testValues[$idx] : ('"' . date('Y-m-d H:i:s', $this->testValues[$idx]) . '"');
+                return $intForTs ? self::$testValues[$idx] : ('"' . date('Y-m-d H:i:s', self::$testValues[$idx]) . '"');
             }
         }
 
-        switch ($this->type) {
+        switch ($t->type) {
             case 'int':
-                return $this->testValues[$idx] = rand(1, 100);
+                return self::$testValues[$idx] = rand(1, 100);
 
             case 'timestamp':
-                $this->testValues[$idx] = 30000000 + rand(1, 1000) * 10;
-                return $intForTs ? $this->testValues[$idx] : ('"' . date('Y-m-d H:i:s', $this->testValues[$idx]) . '"');
+                self::$testValues[$idx] = 30000000 + rand(1, 1000) * 10;
+                return $intForTs ? self::$testValues[$idx] : ('"' . date('Y-m-d H:i:s', self::$testValues[$idx]) . '"');
 
             case 'string':
-                return $this->testValues[$idx] = '"' . substr(
+                return self::$testValues[$idx] = '"' . substr(
                         str_shuffle(
                             str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
                         ),
@@ -261,13 +264,65 @@ class Type
                     ) . '"';
 
             case 'float':
-                return $this->testValues[$idx] = rand(1, 100) + 0.5;
+                return self::$testValues[$idx] = rand(1, 100) + 0.5;
 
             case 'bool':
-                return $this->testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
+                return self::$testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
 
             default:
-                throw new Exception("Invalid datatype " . $this->type);
+                throw new Exception("Invalid datatype " . $type);
+        }
+    }
+
+    public static function getTestValueIncremented($type, $idx)
+    {
+        $t = new Type($type);
+        if (isset(self::$testValues[$idx])) {
+            switch ($t->type) {
+                case 'int':
+                    return self::$testValues[$idx] + 1;
+
+                case 'timestamp':
+                    return self::$testValues[$idx] + 1;
+
+                case 'string':
+                    return self::$testValues[$idx] . ' . "123"';
+
+                case 'float':
+                    return self::$testValues[$idx] + 1.3;
+
+                case 'bool':
+                    return self::$testValues[$idx] === 'true' ? 'false' : 'true';
+
+                default:
+                    throw new Exception("Invalid datatype " . $type);
+            }
+        }
+
+        switch ($t->type) {
+            case 'int':
+                return self::$testValues[$idx] = rand(1, 100);
+
+            case 'timestamp':
+                return self::$testValues[$idx] = 30000000 + rand(1, 1000) * 10;
+
+            case 'string':
+                return self::$testValues[$idx] = '"' . substr(
+                        str_shuffle(
+                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
+                        ),
+                        1,
+                        16
+                    ) . '"';
+
+            case 'float':
+                return self::$testValues[$idx] = rand(1, 100) + 0.5;
+
+            case 'bool':
+                return self::$testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
+
+            default:
+                throw new Exception("Invalid datatype " . $type);
         }
     }
 }

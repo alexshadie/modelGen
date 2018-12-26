@@ -15,6 +15,7 @@ class TestFile extends CommonFile
         $content[] = "class {$this->name}Test extends TestCase\n{";
         $content[] = "";
         $content[] = $this->buildTest();
+        $content[] = $this->buildTestEquals();
         $content[] = "}";
         $content[] = "";
 
@@ -39,18 +40,38 @@ class TestFile extends CommonFile
         $test1Init = [];
         $test1Assert = [];
         $test2Init = [];
+        $test2Assert = [];
+        $test3Init = [];
+        $test3Assert = [];
+        $test4Init = [];
+        $test4Assert = [];
+        $test5Init = [];
+        $test5Assert = [];
+        $test6Init = [];
+        $test6Assert = [];
 
         // Simple
         $test[] = S . "public function testCreate()";
         $test[] = S . "{";
         $test[] = S . S . "\$m = new {$this->name}(";
+        $idx = 0;
+        Type::resetTestValues();
         foreach ($this->fields as $field => $type) {
             $t = new Type($type);
 
-            $test1Init[] = S . S . S . $t->getTestValue($field . "1");
-            $test1Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValue($field . "1") . ", \$m->get" . ucfirst($field) . "());";
-            $test2Init[] = S . S . S . "->set" . ucfirst($field) . "(" . $t->getTestValue($field . "2") . ")";
-            $test2Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValue($field . "2") . ", \$m->get" . ucfirst($field) . "());";
+            $test1Init[] = S . S . S . Type::getTestValue($type, $field . "1");
+            $test1Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValue($type, $field . "1") . ", \$m->get" . ucfirst($field) . "());";
+            $test2Init[] = S . S . S . "->set" . ucfirst($field) . "(" . Type::getTestValue($type, $field . "2") . ")";
+            $test2Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValue($type, $field . "2") . ", \$m->get" . ucfirst($field) . "());";
+            $test3Init[] = S . S . "\$src['$field'] = " . Type::getTestValue($type, $field . "3") . ";";
+            $test3Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValue($type, $field . "3") . ", \$m->get" . ucfirst($field) . "());";
+            $test4Init[] = S . S . "\$src[$idx] = " . Type::getTestValue($type, $field . "4") . ";";
+            $test4Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValue($type, $field . "4") . ", \$m->get" . ucfirst($field) . "());";
+            $test5Init[] = S . S . "\$src['" . camelCaseToUnderscores($field) . "'] = " . Type::getTestValue($type, $field . "5") . ";";
+            $test5Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValue($type, $field . "5") . ", \$m->get" . ucfirst($field) . "());";
+            $test6Init[] = S . S . S . "->set" . ucfirst($field) . "(" . Type::getTestValue($type, $field . "2") . ")";
+            $test6Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValue($type, $field . "2") . ", \$m->get" . ucfirst($field) . "());";
+            $idx++;
         }
 
 
@@ -65,6 +86,33 @@ class TestFile extends CommonFile
 
         $test[] = join("\n", $test2Assert) . "\n";
 
+        $test[] = S . S . "\$src = [];";
+        $test[] = join("\n", $test3Init);
+        $test[] = S . S . "\$m = {$this->name}Builder::fromArray(\$src)";
+        $test[] = S . S . S . "->create();";
+
+        $test[] = join("\n", $test3Assert) . "\n";
+
+        $test[] = S . S . "\$src = [];";
+        $test[] = join("\n", $test4Init);
+        $test[] = S . S . "\$m = {$this->name}Builder::fromArray(\$src)";
+        $test[] = S . S . S . "->create();";
+
+        $test[] = join("\n", $test4Assert) . "\n";
+
+        $test[] = S . S . "\$src = [];";
+        $test[] = join("\n", $test5Init);
+        $test[] = S . S . "\$m = {$this->name}Builder::fromArray(\$src)";
+        $test[] = S . S . S . "->create();";
+
+        $test[] = join("\n", $test5Assert) . "\n";
+
+        $test[] = S . S . "\$m = {$this->name}::build()";
+        $test[] = join("\n", $test6Init);
+        $test[] = S . S . S . "->create();";
+
+        $test[] = join("\n", $test6Assert) . "\n";
+
         $test[] = S . "}";
 
         // With NULLs
@@ -74,16 +122,37 @@ class TestFile extends CommonFile
             $test1Assert = [];
             $test2Init = [];
             $test2Assert = [];
+            $test3Init = [];
+            $test3Assert = [];
+            $test4Init = [];
+            $test4Assert = [];
+            $test5Init = [];
+            $test5Assert = [];
+            $test6Init = [];
+            $test6Assert = [];
+
+            $test[] = "";
             $test[] = S . "public function testCreateNulls()";
             $test[] = S . "{";
             $test[] = S . S . "\$m = new {$this->name}(";
+            $idx = 0;
+            Type::resetTestValues();
             foreach ($this->fields as $field => $type) {
                 $t = new Type($type);
 
-                $test1Init[] = S . S . S . $t->getTestValueNull($field . "1");
-                $test1Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueNull($field . "1") . ", \$m->get" . ucfirst($field) . "());";
-                $test2Init[] = S . S . S . "->set" . ucfirst($field) . "(" . $t->getTestValueNull($field . "2") . ")";
-                $test2Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueNull($field . "2") . ", \$m->get" . ucfirst($field) . "());";
+                $test1Init[] = S . S . S . Type::getTestValueNull($type, $field . "1");
+                $test1Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueNull($type, $field . "1") . ", \$m->get" . ucfirst($field) . "());";
+                $test2Init[] = S . S . S . "->set" . ucfirst($field) . "(" . Type::getTestValueNull($type, $field . "2") . ")";
+                $test2Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueNull($type, $field . "2") . ", \$m->get" . ucfirst($field) . "());";
+                $test3Init[] = S . S . "\$src['$field'] = " . Type::getTestValueNull($type, $field . "3") . ";";
+                $test3Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueNull($type, $field . "3") . ", \$m->get" . ucfirst($field) . "());";
+                $test4Init[] = S . S . "\$src[$idx] = " . Type::getTestValueNull($type, $field . "4") . ";";
+                $test4Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueNull($type, $field . "4") . ", \$m->get" . ucfirst($field) . "());";
+                $test5Init[] = S . S . "\$src['" . camelCaseToUnderscores($field) . "'] = " . Type::getTestValueNull($type, $field . "5") . ";";
+                $test5Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueNull($type, $field . "5") . ", \$m->get" . ucfirst($field) . "());";
+                $test6Init[] = S . S . S . "->set" . ucfirst($field) . "(" . Type::getTestValueNull($type, $field . "6") . ")";
+                $test6Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueNull($type, $field . "6") . ", \$m->get" . ucfirst($field) . "());";
+                $idx++;
             }
 
             $test[] = join(",\n", $test1Init);
@@ -96,6 +165,33 @@ class TestFile extends CommonFile
             $test[] = S . S . S . "->create();\n";
 
             $test[] = join("\n", $test2Assert) . "\n";
+
+            $test[] = S . S . "\$src = [];";
+            $test[] = join("\n", $test3Init);
+            $test[] = S . S . "\$m = {$this->name}Builder::fromArray(\$src)";
+            $test[] = S . S . S . "->create();";
+
+            $test[] = join("\n", $test3Assert) . "\n";
+
+            $test[] = S . S . "\$src = [];";
+            $test[] = join("\n", $test4Init);
+            $test[] = S . S . "\$m = {$this->name}Builder::fromArray(\$src)";
+            $test[] = S . S . S . "->create();";
+
+            $test[] = join("\n", $test4Assert) . "\n";
+
+            $test[] = S . S . "\$src = [];";
+            $test[] = join("\n", $test5Init);
+            $test[] = S . S . "\$m = {$this->name}Builder::fromArray(\$src)";
+            $test[] = S . S . S . "->create();";
+
+            $test[] = join("\n", $test5Assert) . "\n";
+
+            $test[] = S . S . "\$m = {$this->name}::build()";
+            $test[] = join("\n", $test6Init);
+            $test[] = S . S . S . "->create();";
+
+            $test[] = join("\n", $test6Assert) . "\n";
 
             $test[] = S . "}";
         }
@@ -107,22 +203,56 @@ class TestFile extends CommonFile
             $test1Assert = [];
             $test2Init = [];
             $test2Assert = [];
+            $test3Init = [];
+            $test3Assert = [];
+            $test4Init = [];
+            $test4Assert = [];
+            $test5Init = [];
+            $test5Assert = [];
+            $test6Init = [];
+            $test6Assert = [];
+            $idx = 0;
+
+            $test[] = "";
             $test[] = S . "public function testCreateTs()";
             $test[] = S . "{";
             $test[] = S . S . "\$m = new {$this->name}(";
+            Type::resetTestValues();
             foreach ($this->fields as $field => $type) {
                 $t = new Type($type);
 
-                $test1Init[] = S . S . S . $t->getTestValueTs($field . "1", 0);
-                $test1Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueTs($field . "1", 1) . ", \$m->get" . ucfirst($field) . "());";
-                if ($type == 'timestamp') {
-                    $test1Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueTs($field . "1", 0) . ", \$m->get" . str_replace("Ts", "Time", ucfirst($field)) . "());";
+                $test1Init[] = S . S . S . Type::getTestValueTs($type,$field . "1", 0);
+                $test1Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type,$field . "1", 1) . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'timestamp' || $type == '?timestamp') {
+                    $test1Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type,$field . "1", 0) . ", \$m->get" . str_replace("Ts", "Time", ucfirst($field)) . "());";
                 }
-                $test2Init[] = S . S . S . "->set" . ucfirst($field) . "(" . $t->getTestValueTs($field . "2", 0) . ")";
-                $test2Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueTs($field . "2", 1) . ", \$m->get" . ucfirst($field) . "());";
-                if ($type == 'timestamp') {
-                    $test2Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueTs($field . "2", 0) . ", \$m->get" . str_replace("Ts", "Time", ucfirst($field)) . "());";
+                $test2Init[] = S . S . S . "->set" . ucfirst($field) . "(" . Type::getTestValueTs($type,$field . "2", 0) . ")";
+                $test2Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type,$field . "2", 1) . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'timestamp' || $type == '?timestamp') {
+                    $test2Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type,$field . "2", 0) . ", \$m->get" . str_replace("Ts", "Time", ucfirst($field)) . "());";
                 }
+
+                $test3Init[] = S . S . "\$src['$field'] = " . Type::getTestValueTs($type, $field . "3", 0) . ";";
+                $test3Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type, $field . "3", 1) . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'timestamp' || $type == '?timestamp') {
+                    $test3Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type,$field . "3", 0) . ", \$m->get" . str_replace("Ts", "Time", ucfirst($field)) . "());";
+                }
+                $test4Init[] = S . S . "\$src[$idx] = " . Type::getTestValueTs($type, $field . "4", 0) . ";";
+                $test4Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type, $field . "4", 1) . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'timestamp' || $type == '?timestamp') {
+                    $test4Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type,$field . "4", 0) . ", \$m->get" . str_replace("Ts", "Time", ucfirst($field)) . "());";
+                }
+                $test5Init[] = S . S . "\$src['" . camelCaseToUnderscores($field) . "'] = " . Type::getTestValueTs($type, $field . "5", 0) . ";";
+                $test5Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type, $field . "5", 1) . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'timestamp' || $type == '?timestamp') {
+                    $test5Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type,$field . "5", 0) . ", \$m->get" . str_replace("Ts", "Time", ucfirst($field)) . "());";
+                }
+                $test6Init[] = S . S . S . "->set" . ucfirst($field) . "(" . Type::getTestValueTs($type, $field . "6", 0) . ")";
+                $test6Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type, $field . "6", 1) . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'timestamp' || $type == '?timestamp') {
+                    $test6Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueTs($type,$field . "6", 0) . ", \$m->get" . str_replace("Ts", "Time", ucfirst($field)) . "());";
+                }
+                $idx++;
             }
 
             $test[] = join(",\n", $test1Init);
@@ -135,6 +265,33 @@ class TestFile extends CommonFile
             $test[] = S . S . S . "->create();\n";
 
             $test[] = join("\n", $test2Assert) . "\n";
+
+            $test[] = S . S . "\$src = [];";
+            $test[] = join("\n", $test3Init);
+            $test[] = S . S . "\$m = {$this->name}Builder::fromArray(\$src)";
+            $test[] = S . S . S . "->create();";
+
+            $test[] = join("\n", $test3Assert) . "\n";
+
+            $test[] = S . S . "\$src = [];";
+            $test[] = join("\n", $test4Init);
+            $test[] = S . S . "\$m = {$this->name}Builder::fromArray(\$src)";
+            $test[] = S . S . S . "->create();";
+
+            $test[] = join("\n", $test4Assert) . "\n";
+
+            $test[] = S . S . "\$src = [];";
+            $test[] = join("\n", $test5Init);
+            $test[] = S . S . "\$m = {$this->name}Builder::fromArray(\$src)";
+            $test[] = S . S . S . "->create();";
+
+            $test[] = join("\n", $test5Assert) . "\n";
+
+            $test[] = S . S . "\$m = {$this->name}::build()";
+            $test[] = join("\n", $test6Init);
+            $test[] = S . S . S . "->create();";
+
+            $test[] = join("\n", $test6Assert) . "\n";
 
             $test[] = S . "}";
         }
@@ -154,6 +311,61 @@ class TestFile extends CommonFile
             $ctorArgs[] = "{$t->getSourceType()} \${$field}";
             $assign[] = $t->getCtorAssign($field);
         }
+
+        return join("\n", $test);
+    }
+
+    protected function buildTestEquals()
+    {
+        $test1Init = [];
+
+        // Simple
+        $test = [""];
+        $test[] = S . "public function testEquals()";
+        $test[] = S . "{";
+        $test[] = S . S . "\$m = new {$this->name}(";
+
+        $nonEquals = [];
+        $eqInit = [];
+
+        $asserts = [];
+
+        foreach ($this->fields as $field => $type) {
+            $t = new Type($type);
+
+            $test1Init[] = S . S . S . Type::getTestValue($type, $field . "1");
+            $eqInit[] = S . S . S . Type::getTestValue($type, $field . "1");
+            $noneqInit = [];
+            foreach ($this->fields as $field1 => $type1) {
+                $value = ($field1 === $field) ? Type::getTestValueIncremented($type, $field1 . "1") : Type::getTestValue($type1, $field1 . "1");
+                $noneqInit[] = S . S . S . $value;
+
+            }
+
+            $asserts[] = S.S."\$this->assertFalse(\$m->equals(\$mne" . ucfirst($field) . "));";
+            $asserts[] = S.S."\$this->assertFalse(\$mne" . ucfirst($field) . "->equals(\$m));";
+
+            $nonEquals[] = S.S."\$mne" . ucfirst($field) . " = new {$this->name}(";
+            $nonEquals[] = join(",\n", $noneqInit);
+            $nonEquals[] = S.S.");\n";
+
+        }
+
+        $test[] = join(",\n", $test1Init);
+        $test[] = S . S . ");\n";
+
+        $test[] = S . S . "\$me = new {$this->name}(";
+        $test[] = join(",\n", $eqInit);
+        $test[] = S . S . ");\n";
+
+        $test[] = join("\n", $nonEquals);
+
+        $test[] = S.S."\$this->assertTrue(\$m->equals(\$me));";
+        $test[] = S.S."\$this->assertTrue(\$me->equals(\$m));";
+        $test[] = S.S."\$this->assertFalse(\$m->equals(null));";
+        $test[] = join("\n", $asserts);
+
+        $test[] = S . "}";
 
         return join("\n", $test);
     }

@@ -79,12 +79,12 @@ if ($out) {
     }
     file_put_contents($outputPath . "/tests/unit/" . str_replace("\\", "/", $modelStructure['ns']) . "/" . $model . "Test.php", $testFile->generate());
 } else {
-    echo "\n\n========================= Model ===============================\n";
-    echo $mFile->generate();
-    echo "\n\n========================= Builder =============================\n";
-    echo $bFile->generate();
-    echo "\n\n========================= SQL =================================\n";
-    echo $sqlFile->generate();
+//    echo "\n\n========================= Model ===============================\n";
+//    echo $mFile->generate();
+//    echo "\n\n========================= Builder =============================\n";
+//    echo $bFile->generate();
+//    echo "\n\n========================= SQL =================================\n";
+//    echo $sqlFile->generate();
     echo "\n\n========================= Test ================================\n";
     echo $testFile->generate();
 }
