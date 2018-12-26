@@ -52,11 +52,13 @@ class BuilderFile extends CommonFile
         $idx = 0;
 
         foreach ($this->fields as $field => $type) {
+            $t = new Type($type);
             $fromContent[] = "        \$builder->set" . ucfirst($field) . "(\$src->get" . ucfirst($field) . "());";
+            $default = $t->getDefaultValue();
             if (camelCaseToUnderscores($field) === $field) {
-                $fromArrayContent[] = "        \$builder->set" . ucfirst($field) . "(\$src[\"$field\"] ?? \$src[$idx]);";
+                $fromArrayContent[] = "        \$builder->set" . ucfirst($field) . "(\$src[\"$field\"] ?? \$src[$idx] ?? $default);";
             } else {
-                $fromArrayContent[] = "        \$builder->set" . ucfirst($field) . "(\$src[\"" . camelCaseToUnderscores($field) . "\"] ?? \$src[\"$field\"] ?? \$src[$idx]);";
+                $fromArrayContent[] = "        \$builder->set" . ucfirst($field) . "(\$src[\"" . camelCaseToUnderscores($field) . "\"] ?? \$src[\"$field\"] ?? \$src[$idx] ?? $default);";
             }
             $createContent[] = "            \$this->{$field}";
             $idx++;

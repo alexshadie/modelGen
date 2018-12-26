@@ -140,6 +140,29 @@ class Type
         $this->testValues = [];
     }
 
+    public function getDefaultValue()
+    {
+        switch ($this->type) {
+            case 'int':
+                return 0;
+
+            case 'timestamp':
+                return 0;
+
+            case 'string':
+                return '""';
+
+            case 'float':
+                return 0;
+
+            case 'bool':
+                return 'false';
+
+            default:
+                throw new Exception("Invalid datatype " . $this->type);
+        }
+    }
+
     public function getTestValue($idx)
     {
         if (isset($this->testValues[$idx])) {

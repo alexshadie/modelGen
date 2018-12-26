@@ -116,12 +116,12 @@ class TestFile extends CommonFile
                 $test1Init[] = S . S . S . $t->getTestValueTs($field . "1", 0);
                 $test1Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueTs($field . "1", 1) . ", \$m->get" . ucfirst($field) . "());";
                 if ($type == 'timestamp') {
-                    $test1Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueTs($field . "1", 0) . ", \$m->get" . ucfirst(str_replace("Ts", "Time", $field)) . "());";
+                    $test1Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueTs($field . "1", 0) . ", \$m->get" . str_replace("Ts", "Time", ucfirst($field)) . "());";
                 }
                 $test2Init[] = S . S . S . "->set" . ucfirst($field) . "(" . $t->getTestValueTs($field . "2", 0) . ")";
                 $test2Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueTs($field . "2", 1) . ", \$m->get" . ucfirst($field) . "());";
                 if ($type == 'timestamp') {
-                    $test2Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueTs($field . "2", 0) . ", \$m->get" . ucfirst(str_replace("Ts", "Time", $field)) . "());";
+                    $test2Assert[] = S . S . "\$this->assertEquals(" . $t->getTestValueTs($field . "2", 0) . ", \$m->get" . str_replace("Ts", "Time", ucfirst($field)) . "());";
                 }
             }
 
