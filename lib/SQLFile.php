@@ -3,16 +3,6 @@
 
 class SQLFile extends CommonFile
 {
-    private function buildFields()
-    {
-        $sqlFields = [];
-        foreach ($this->fields as $field => $type) {
-            $t = new Type($type);
-            $sqlFields[] = S . $t->getSQLName($field);
-        }
-        return join(",\n", $sqlFields);
-    }
-
     public function generate()
     {
 
@@ -25,6 +15,16 @@ class SQLFile extends CommonFile
         $file[] = ");";
         $file[] = "";
         return join("\n", $file);
+    }
+
+    private function buildFields()
+    {
+        $sqlFields = [];
+        foreach ($this->fields as $field => $type) {
+            $t = new Type($type);
+            $sqlFields[] = S . $t->getSQLName($field);
+        }
+        return join(",\n", $sqlFields);
     }
 
 }

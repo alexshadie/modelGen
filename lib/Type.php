@@ -4,6 +4,7 @@ class Type
 {
     private $type;
     private $nullable;
+    private $testValues = [];
 
     public function __construct(string $type)
     {
@@ -34,35 +35,6 @@ class Type
         return $detectedType;
     }
 
-    public function getReturnType()
-    {
-        switch ($this->type) {
-            case 'timestamp':
-                $detectedType = 'int';
-                break;
-            default:
-                $detectedType = $this->type;
-        }
-        if ($this->nullable) {
-            return "?" . $detectedType;
-        }
-        return $detectedType;
-    }
-
-    public function getSourceType()
-    {
-        switch ($this->type) {
-            case 'timestamp':
-                return "";
-            default:
-                $detectedType = $this->type;
-        }
-        if ($this->nullable) {
-            return "?" . $detectedType;
-        }
-        return $detectedType;
-    }
-
     public function getter($field)
     {
         $s = "    public function get" . ucfirst($field) . "()";
@@ -83,6 +55,21 @@ class Type
         return $s;
     }
 
+    public function getReturnType()
+    {
+        switch ($this->type) {
+            case 'timestamp':
+                $detectedType = 'int';
+                break;
+            default:
+                $detectedType = $this->type;
+        }
+        if ($this->nullable) {
+            return "?" . $detectedType;
+        }
+        return $detectedType;
+    }
+
     public function setter($field, $model)
     {
         $s = "    public function set" . ucfirst($field) . "(";
@@ -95,6 +82,20 @@ class Type
         }
         $s .= "\n        return \$this;\n    }";
         return $s;
+    }
+
+    public function getSourceType()
+    {
+        switch ($this->type) {
+            case 'timestamp':
+                return "";
+            default:
+                $detectedType = $this->type;
+        }
+        if ($this->nullable) {
+            return "?" . $detectedType;
+        }
+        return $detectedType;
     }
 
     public function getCtorAssign($field)
@@ -134,7 +135,6 @@ class Type
         return camelCaseToUnderscores($field) . " " . $dt . ($this->nullable ? "" : " NOT NULL");
     }
 
-    private $testValues = [];
     public function resetTestValues()
     {
         $this->testValues = [];
@@ -146,28 +146,27 @@ class Type
             return $this->testValues[$idx];
         }
 
-        switch ($this->type)
-        {
+        switch ($this->type) {
             case 'int':
-                return $this->testValues[$idx] = rand(1,100);
+                return $this->testValues[$idx] = rand(1, 100);
 
             case 'timestamp':
-                return $this->testValues[$idx] = 30000000 + rand(1,1000) * 10;
+                return $this->testValues[$idx] = 30000000 + rand(1, 1000) * 10;
 
             case 'string':
                 return $this->testValues[$idx] = '"' . substr(
                         str_shuffle(
-                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16/strlen($x)) )
+                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
                         ),
                         1,
                         16
                     ) . '"';
 
             case 'float':
-                return $this->testValues[$idx] = rand(1,100) + 0.5;
+                return $this->testValues[$idx] = rand(1, 100) + 0.5;
 
             case 'bool':
-                return $this->testValues[$idx] = (rand(1,100) > 50) ? 'true' : 'false';
+                return $this->testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
 
             default:
                 throw new Exception("Invalid datatype " . $this->type);
@@ -184,28 +183,27 @@ class Type
             return $this->testValues[$idx] = 'null';
         }
 
-        switch ($this->type)
-        {
+        switch ($this->type) {
             case 'int':
-                return $this->testValues[$idx] = rand(1,100);
+                return $this->testValues[$idx] = rand(1, 100);
 
             case 'timestamp':
-                return $this->testValues[$idx] = 30000000 + rand(1,1000) * 10;
+                return $this->testValues[$idx] = 30000000 + rand(1, 1000) * 10;
 
             case 'string':
                 return $this->testValues[$idx] = '"' . substr(
                         str_shuffle(
-                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16/strlen($x)) )
+                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
                         ),
                         1,
                         16
                     ) . '"';
 
             case 'float':
-                return $this->testValues[$idx] = rand(1,100) + 0.5;
+                return $this->testValues[$idx] = rand(1, 100) + 0.5;
 
             case 'bool':
-                return $this->testValues[$idx] = (rand(1,100) > 50) ? 'true' : 'false';
+                return $this->testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
 
             default:
                 throw new Exception("Invalid datatype " . $this->type);
@@ -222,29 +220,28 @@ class Type
             }
         }
 
-        switch ($this->type)
-        {
+        switch ($this->type) {
             case 'int':
-                return $this->testValues[$idx] = rand(1,100);
+                return $this->testValues[$idx] = rand(1, 100);
 
             case 'timestamp':
-                $this->testValues[$idx] = 30000000 + rand(1,1000) * 10;
+                $this->testValues[$idx] = 30000000 + rand(1, 1000) * 10;
                 return $intForTs ? $this->testValues[$idx] : ('"' . date('Y-m-d H:i:s', $this->testValues[$idx]) . '"');
 
             case 'string':
                 return $this->testValues[$idx] = '"' . substr(
                         str_shuffle(
-                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16/strlen($x)) )
+                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
                         ),
                         1,
                         16
                     ) . '"';
 
             case 'float':
-                return $this->testValues[$idx] = rand(1,100) + 0.5;
+                return $this->testValues[$idx] = rand(1, 100) + 0.5;
 
             case 'bool':
-                return $this->testValues[$idx] = (rand(1,100) > 50) ? 'true' : 'false';
+                return $this->testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
 
             default:
                 throw new Exception("Invalid datatype " . $this->type);
