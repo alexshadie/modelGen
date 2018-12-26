@@ -18,17 +18,6 @@ $outputPath = realpath($config['path']);
 if (!$model || !preg_match('!^[A-Za-z/]+$!i', $model)) {
     die("Specify model");
 }
-//
-//if ($out) {
-//    if (strpos($out, '/') !== 0) {
-//        $out = __DIR__ . "/../../../" . $out;
-//    }
-//    if (!is_dir($out)) {
-//        die("Output dir doesn't exist");
-//    }
-//}
-
-
 
 $modelStructure = include $config['modelpath'] . '/' . $model . '.php';
 $position = strrpos($model, '/');
