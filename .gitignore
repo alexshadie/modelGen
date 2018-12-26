@@ -1,0 +1,15 @@
+/vendor/
+/nbproject/private/
+nbproject
+*.iml
+/error.log
+.idea
+.mode
+/runtime/
+
+/import/*.DBF
+/import/*.csv
+/import/*.html
+/config/config.php
+/import/curinfo/*
+/models/
