@@ -19,7 +19,11 @@ if (!$model || !preg_match('!^[A-Za-z/]+$!i', $model)) {
     die("Specify model");
 }
 
+echo "Generating {$model}\n";
+
 $modelStructure = include $config['modelpath'] . '/' . $model . '.php';
+$modelHash = md5_file($config['modelpath'] . '/' . $model . '.php');
+
 $position = strrpos($model, '/');
 if (!$position) {
     $position = 0;
@@ -29,26 +33,26 @@ if (!$position) {
 $model = substr($model, $position);
 
 
-$mFile = new ModelFile();
+$mFile = new ModelFile($modelHash);
 $mFile->setName($model);
 $mFile->setNamespace($modelStructure['ns'] ?? null);
 $mFile->setFields($modelStructure['fields']);
 $mFile->setExports($modelStructure['exports']);
 
-$bFile = new BuilderFile();
+$bFile = new BuilderFile($modelHash);
 $bFile->setName($model);
 $bFile->setNamespace($modelStructure['ns'] ?? null);
 $bFile->setFields($modelStructure['fields']);
 $bFile->setExports($modelStructure['exports']);
 
 
-$sqlFile = new SQLFile();
+$sqlFile = new SQLFile($modelHash);
 $sqlFile->setName($model);
 $sqlFile->setNamespace($modelStructure['ns'] ?? null);
 $sqlFile->setFields($modelStructure['fields']);
 $sqlFile->setExports($modelStructure['exports']);
 
-$testFile = new TestFile();
+$testFile = new TestFile($modelHash);
 $testFile->setName($model);
 $testFile->setNamespace($modelStructure['ns'] ?? null);
 $testFile->setFields($modelStructure['fields']);
@@ -56,24 +60,16 @@ $testFile->setExports($modelStructure['exports']);
 
 
 if ($out) {
-//    var_export($outputPath . "/src/" . str_replace("\\", "/", $modelStructure['ns']) . "/" . $model . ".php");
-//    die();
-    if (!is_dir($outputPath . "/src/" . str_replace("\\", "/", $modelStructure['ns']))) {
-        mkdir($outputPath . "/src/" . str_replace("\\", "/", $modelStructure['ns']), 0755, 1);
-    }
-    file_put_contents($outputPath . "/src/" . str_replace("\\", "/", $modelStructure['ns']) . "/" . $model . ".php", $mFile->generate());
-    file_put_contents($outputPath . "/src/" . str_replace("\\", "/", $modelStructure['ns']) . "/" . $model . "Builder.php", $bFile->generate());
-    if (!is_dir($outputPath . "/tests/unit/" . str_replace("\\", "/", $modelStructure['ns']))) {
-        mkdir($outputPath . "/tests/unit/" . str_replace("\\", "/", $modelStructure['ns']), 0755, 1);
-    }
-    file_put_contents($outputPath . "/tests/unit/" . str_replace("\\", "/", $modelStructure['ns']) . "/" . $model . "Test.php", $testFile->generate());
+    $mFile->write($outputPath . "/src/" . str_replace("\\", "/", $modelStructure['ns']), $model . ".php");
+    $bFile->write($outputPath . "/src/" . str_replace("\\", "/", $modelStructure['ns']), $model . "Builder.php");
+    $testFile->write($outputPath . "/tests/unit/" . str_replace("\\", "/", $modelStructure['ns']), $model . "Test.php");
 } else {
-//    echo "\n\n========================= Model ===============================\n";
-//    echo $mFile->generate();
-//    echo "\n\n========================= Builder =============================\n";
-//    echo $bFile->generate();
-//    echo "\n\n========================= SQL =================================\n";
-//    echo $sqlFile->generate();
+    echo "\n\n========================= Model ===============================\n";
+    echo $mFile->generate();
+    echo "\n\n========================= Builder =============================\n";
+    echo $bFile->generate();
+    echo "\n\n========================= SQL =================================\n";
+    echo $sqlFile->generate();
     echo "\n\n========================= Test ================================\n";
     echo $testFile->generate();
 }
