@@ -37,32 +37,34 @@ $mFile = new ModelFile($modelHash);
 $mFile->setName($model);
 $mFile->setNamespace($modelStructure['ns'] ?? null);
 $mFile->setFields($modelStructure['fields']);
-$mFile->setExports($modelStructure['exports']);
+$mFile->setExports($modelStructure['exports'] ?? []);
+$mFile->setUseCoreUtils($modelStructure['useCoreUtils'] ?? true);
 
 $bFile = new BuilderFile($modelHash);
 $bFile->setName($model);
 $bFile->setNamespace($modelStructure['ns'] ?? null);
 $bFile->setFields($modelStructure['fields']);
-$bFile->setExports($modelStructure['exports']);
+$bFile->setExports($modelStructure['exports'] ?? []);
 
 
 $sqlFile = new SQLFile($modelHash);
 $sqlFile->setName($model);
 $sqlFile->setNamespace($modelStructure['ns'] ?? null);
 $sqlFile->setFields($modelStructure['fields']);
-$sqlFile->setExports($modelStructure['exports']);
+$sqlFile->setExports($modelStructure['exports'] ?? []);
 
 $testFile = new TestFile($modelHash);
 $testFile->setName($model);
 $testFile->setNamespace($modelStructure['ns'] ?? null);
 $testFile->setFields($modelStructure['fields']);
-$testFile->setExports($modelStructure['exports']);
+$testFile->setExports($modelStructure['exports'] ?? []);
 
 
 if ($out) {
-    $mFile->write($outputPath . "/src/" . str_replace("\\", "/", $modelStructure['ns']), $model . ".php");
-    $bFile->write($outputPath . "/src/" . str_replace("\\", "/", $modelStructure['ns']), $model . "Builder.php");
-    $testFile->write($outputPath . "/tests/unit/" . str_replace("\\", "/", $modelStructure['ns']), $model . "Test.php");
+    $relPath = $modelStructure['path'] ?? str_replace("\\", "/", $modelStructure['ns']);
+    $mFile->write($outputPath . "/src/" . $relPath . '/', $model . ".php");
+    $bFile->write($outputPath . "/src/" . $relPath . '/', $model . "Builder.php");
+    $testFile->write($outputPath . "/tests/unit/" . $relPath . '/', $model . "Test.php");
 } else {
     echo "\n\n========================= Model ===============================\n";
     echo $mFile->generate();

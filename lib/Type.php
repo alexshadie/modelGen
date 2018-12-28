@@ -26,11 +26,51 @@ class Type
             case 'timestamp':
                 $detectedType = 'int';
                 break;
+
+            case 'jsonarray':
+                $detectedType = 'array';
+                break;
+
             default:
                 $detectedType = $this->type;
         }
         if ($this->nullable) {
             return $detectedType . "|null";
+        }
+        return $detectedType;
+    }
+
+    public function getReturnType()
+    {
+        switch ($this->type) {
+            case 'timestamp':
+                $detectedType = 'int';
+                break;
+
+            case 'jsonarray':
+                $detectedType = 'array';
+                break;
+
+            default:
+                $detectedType = $this->type;
+        }
+        if ($this->nullable) {
+            return "?" . $detectedType;
+        }
+        return $detectedType;
+    }
+
+    public function getSourceType()
+    {
+        switch ($this->type) {
+            case 'timestamp':
+            case 'jsonarray':
+                return "";
+            default:
+                $detectedType = $this->type;
+        }
+        if ($this->nullable) {
+            return "?" . $detectedType;
         }
         return $detectedType;
     }
@@ -52,56 +92,70 @@ class Type
             $s .= "        return \core\Utils::date(\$this->{$field});\n";
             $s .= "    }";
         }
-        return $s;
-    }
 
-    public function getReturnType()
-    {
-        switch ($this->type) {
-            case 'timestamp':
-                $detectedType = 'int';
-                break;
-            default:
-                $detectedType = $this->type;
+        if ($this->type == 'jsonarray') {
+            $s .= "\n\n" . S . "public function get" . ucfirst($field). "Json(): string";
+            $s .= "\n    {\n";
+            $s .= "        return json_encode(\$this->{$field});\n";
+            $s .= "    }";
         }
-        if ($this->nullable) {
-            return "?" . $detectedType;
-        }
-        return $detectedType;
+
+        return $s;
     }
 
     public function setter($field, $model)
     {
         $s = "    public function set" . ucfirst($field) . "(";
         $s .= ($this->getSourceType() ? $this->getSourceType() . " " : "") . "\${$field}): {$model}Builder\n";
-        $s .= "    {\n        \$this->{$field} = ";
+        $s .= "    {\n";
         if ($this->type === 'timestamp') {
+            $s .= S.S."\$this->{$field} = ";
             $s .= "\core\Utils::tsValue(\${$field});";
+        } elseif ($this->type === 'jsonarray') {
+            if ($this->nullable) {
+                $s .= S . S . "if (is_null(\${$field})) {\n";
+                $s .= S . S . S . "\$this->{$field} = null;\n";
+                $s .= S . S . "else";
+            }
+            $s .= S . S . "if (!\${$field}) {\n";
+            $s .= S . S . S . "\$this->{$field} = [];\n";
+            $s .= S . S . "} elseif (is_array(\${$field})) {\n";
+            $s .= S . S . S . "\$this->{$field} = \${$field};\n";
+            $s .= S . S . "} elseif (json_decode(\${$field})) {\n";
+            $s .= S . S . S . "\$this->{$field} = json_decode(\${$field}, true);\n";
+            $s .= S . S . "} else {\n";
+            $s .= S . S . S . "\$this->{$field} = [\${$field}];\n";
+            $s .= S . S . "}";
         } else {
+            $s .= S.S."\$this->{$field} = ";
             $s .= "\${$field};";
         }
         $s .= "\n        return \$this;\n    }";
         return $s;
     }
 
-    public function getSourceType()
-    {
-        switch ($this->type) {
-            case 'timestamp':
-                return "";
-            default:
-                $detectedType = $this->type;
-        }
-        if ($this->nullable) {
-            return "?" . $detectedType;
-        }
-        return $detectedType;
-    }
-
     public function getCtorAssign($field)
     {
-        if ($this->type == 'timestamp') {
+        if ($this->type === 'timestamp') {
             return "        \$this->{$field} = \core\Utils::tsValue(\${$field});";
+        } elseif ($this->type === 'jsonarray') {
+            $s = "";
+            if ($this->nullable) {
+                $s .= S . S . "if (is_null(\${$field})) {\n";
+                $s .= S . S . S . "\$this->{$field} = null;\n";
+                $s .= S . S . "else";
+            }
+            $s .= S . S . "if (!\${$field}) {\n";
+            $s .= S . S . S . "\$this->{$field} = [];\n";
+            $s .= S . S . "} elseif (is_array(\${$field})) {\n";
+            $s .= S . S . S . "\$this->{$field} = \${$field};\n";
+            $s .= S . S . "} elseif (json_decode(\${$field})) {\n";
+            $s .= S . S . S . "\$this->{$field} = json_decode(\${$field}, true);\n";
+            $s .= S . S . "} else {\n";
+            $s .= S . S . S . "\$this->{$field} = [\${$field}];\n";
+            $s .= S . S . "}";
+            $s .= "";
+            return $s;
         }
         return "        \$this->{$field} = \${$field};";
     }
@@ -129,6 +183,10 @@ class Type
                 $dt = 'TINYINT';
                 break;
 
+            case 'jsonarray':
+                $dt = 'VARCHAR(1024)';
+                break;
+
             default:
                 throw new Exception("Invalid datatype " . $this->type);
         }
@@ -142,6 +200,9 @@ class Type
 
     public function getDefaultValue()
     {
+        if ($this->nullable) {
+            return 'null';
+        }
         switch ($this->type) {
             case 'int':
                 return 0;
@@ -157,6 +218,9 @@ class Type
 
             case 'bool':
                 return 'false';
+
+            case 'jsonarray':
+                return '"[]"';
 
             default:
                 throw new Exception("Invalid datatype " . $this->type);
@@ -191,6 +255,15 @@ class Type
 
             case 'bool':
                 return self::$testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
+
+            case 'jsonarray':
+                return self::$testValues[$idx] = '["' . substr(
+                        str_shuffle(
+                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
+                        ),
+                        1,
+                        16
+                    ) . '"]';
 
             default:
                 throw new Exception("Invalid datatype " . $type);
@@ -229,6 +302,15 @@ class Type
 
             case 'bool':
                 return self::$testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
+
+            case 'jsonarray':
+                return self::$testValues[$idx] = '["' . substr(
+                        str_shuffle(
+                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
+                        ),
+                        1,
+                        16
+                    ) . '"]';
 
             default:
                 throw new Exception("Invalid datatype " . $type);
@@ -269,6 +351,15 @@ class Type
             case 'bool':
                 return self::$testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
 
+            case 'jsonarray':
+                return self::$testValues[$idx] = '["' . substr(
+                        str_shuffle(
+                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
+                        ),
+                        1,
+                        16
+                    ) . '"]';
+
             default:
                 throw new Exception("Invalid datatype " . $type);
         }
@@ -293,6 +384,9 @@ class Type
 
                 case 'bool':
                     return self::$testValues[$idx] === 'true' ? 'false' : 'true';
+
+                case 'jsonarray':
+                    return preg_replace('!"]$!', 'abc"]', self::$testValues[$idx]);
 
                 default:
                     throw new Exception("Invalid datatype " . $type);
@@ -320,6 +414,15 @@ class Type
 
             case 'bool':
                 return self::$testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
+
+            case 'jsonarray':
+                return self::$testValues[$idx] = '["' . substr(
+                        str_shuffle(
+                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
+                        ),
+                        1,
+                        16
+                    ) . '"]';
 
             default:
                 throw new Exception("Invalid datatype " . $type);

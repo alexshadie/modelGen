@@ -9,6 +9,7 @@ abstract class CommonFile
     protected $fields;
     protected $exports;
     protected $modelHash;
+    protected $useCoreUtils;
 
     public function __construct($modelHash)
     {
@@ -35,6 +36,11 @@ abstract class CommonFile
         $this->exports = $exports;
     }
 
+    public function setUseCoreUtils($useCoreUtils)
+    {
+        $this->useCoreUtils = !!$useCoreUtils;
+    }
+
     public function write($path, $file)
     {
         if (!is_dir($path)) {
@@ -47,7 +53,7 @@ abstract class CommonFile
             fgets($f);
             $v = fgets($f);
             fclose($f);
-            if (preg_match('! * VERSION: ([a-z0-9]+)!', $v, $m)) {
+            if (preg_match('! * VERSION: _([a-z0-9]+)!', $v, $m)) {
                 $v = $m[1];
             } else {
                 $v = null;

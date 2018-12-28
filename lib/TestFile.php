@@ -324,6 +324,7 @@ class TestFile extends CommonFile
 
         $asserts = [];
 
+        Type::resetTestValues();
         foreach ($this->fields as $field => $type) {
             $test1Init[] = S . S . S . Type::getTestValue($type, $field . "1");
             $eqInit[] = S . S . S . Type::getTestValue($type, $field . "1");

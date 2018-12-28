@@ -12,8 +12,10 @@ class ModelFile extends CommonFile
         }
 
         $content[] = "class {$this->name} \n{";
-        $content[] = S . "use \core\ToArrayTrait;";
-        $content[] = "";
+        if ($this->useCoreUtils) {
+            $content[] = S . "use \core\ToArrayTrait;";
+            $content[] = "";
+        }
         $content[] = $this->buildFields();
         $content[] = $this->buildCtor();
         $content[] = "";
