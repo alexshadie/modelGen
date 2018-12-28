@@ -53,7 +53,7 @@ abstract class CommonFile
             fgets($f);
             $v = fgets($f);
             fclose($f);
-            if (preg_match('! * VERSION: _([a-z0-9]+)!', $v, $m)) {
+            if (preg_match('! * VERSION: ([a-z0-9]+)!', $v, $m)) {
                 $v = $m[1];
             } else {
                 $v = null;
