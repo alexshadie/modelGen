@@ -1,9 +1,9 @@
 <?php
 
 $localDir = __DIR__;
-if (strpos($localDir, '/vendor/bin') === strlen($localDir) - 11) {
+if (strpos($localDir, '/vendor/alexshadie/model-gen/bin') === strlen($localDir) - 32) {
     // Vendor directory, works as library
-    $configPath = substr($localDir, 0, strlen($localDir) - 11) . '/config';
+    $configPath = substr($localDir, 0, strlen($localDir) - 32) . '/config';
 } else {
     $configPath = substr($localDir, 0, strlen($localDir) - 4) . '/config';
 }

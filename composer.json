@@ -17,5 +17,6 @@
             "mgen\\": "src/",
             "tests\\" : "tests/"
         }
-    }
+    },
+    "bin": ["bin/mgen-all.php", "bin/mgen-model.php"]
 }

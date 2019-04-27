@@ -21,5 +21,5 @@ return [
     'defaults' => [
         'email' => 'a@a.a',
         'name' => '',
-    ]
+    ],
 ];
