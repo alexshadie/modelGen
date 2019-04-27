@@ -10,6 +10,6 @@ nbproject
 /import/*.DBF
 /import/*.csv
 /import/*.html
-/config/config.php
+/config/mgen-config.php
 /import/curinfo/*
 /models/

@@ -1,5 +1,7 @@
 <?php
 
+namespace mgen;
+
 class Type
 {
     private $type;
@@ -89,12 +91,12 @@ class Type
             $s .= "\n\n    public function get" . str_replace("Ts", "Time", ucfirst($field)) . "()";
             $s .= ": string";
             $s .= "\n    {\n";
-            $s .= "        return \core\Utils::date(\$this->{$field});\n";
+            $s .= "        return \\mgen\\ext\\Utils::date(\$this->{$field});\n";
             $s .= "    }";
         }
 
         if ($this->type == 'jsonarray') {
-            $s .= "\n\n" . S . "public function get" . ucfirst($field). "Json(): string";
+            $s .= "\n\n" . S . "public function get" . ucfirst($field) . "Json(): string";
             $s .= "\n    {\n";
             $s .= "        return json_encode(\$this->{$field});\n";
             $s .= "    }";
@@ -109,8 +111,8 @@ class Type
         $s .= ($this->getSourceType() ? $this->getSourceType() . " " : "") . "\${$field}): {$model}Builder\n";
         $s .= "    {\n";
         if ($this->type === 'timestamp') {
-            $s .= S.S."\$this->{$field} = ";
-            $s .= "\core\Utils::tsValue(\${$field});";
+            $s .= S . S . "\$this->{$field} = ";
+            $s .= "\\mgen\\ext\\Utils::tsValue(\${$field});";
         } elseif ($this->type === 'jsonarray') {
             if ($this->nullable) {
                 $s .= S . S . "if (is_null(\${$field})) {\n";
@@ -127,7 +129,7 @@ class Type
             $s .= S . S . S . "\$this->{$field} = [\${$field}];\n";
             $s .= S . S . "}";
         } else {
-            $s .= S.S."\$this->{$field} = ";
+            $s .= S . S . "\$this->{$field} = ";
             $s .= "\${$field};";
         }
         $s .= "\n        return \$this;\n    }";
@@ -137,7 +139,7 @@ class Type
     public function getCtorAssign($field)
     {
         if ($this->type === 'timestamp') {
-            return "        \$this->{$field} = \core\Utils::tsValue(\${$field});";
+            return "        \$this->{$field} = \\mgen\\ext\\Utils::tsValue(\${$field});";
         } elseif ($this->type === 'jsonarray') {
             $s = "";
             if ($this->nullable) {
@@ -162,6 +164,9 @@ class Type
 
     public function getSQLName($field)
     {
+        if ($this->nullable) {
+            return 'null';
+        }
         switch ($this->type) {
             case 'int':
                 $dt = "INT";
@@ -188,9 +193,9 @@ class Type
                 break;
 
             default:
-                throw new Exception("Invalid datatype " . $this->type);
+                throw new \Exception("Invalid datatype " . $this->type);
         }
-        return camelCaseToUnderscores($field) . " " . $dt . ($this->nullable ? "" : " NOT NULL");
+        return Helper::camelCaseToUnderscores($field) . " " . $dt . ($this->nullable ? "" : " NOT NULL");
     }
 
     public static function resetTestValues()
@@ -223,7 +228,36 @@ class Type
                 return '"[]"';
 
             default:
-                throw new Exception("Invalid datatype " . $this->type);
+                throw new \Exception("Invalid datatype " . $this->type);
+        }
+    }
+
+    public function getQuotedValue($value)
+    {
+        if ($this->nullable) {
+            return 'null';
+        }
+        switch ($this->type) {
+            case 'int':
+                return intval($value);
+
+            case 'timestamp':
+                return intval($value);
+
+            case 'string':
+                return '"' . $value . '"';
+
+            case 'float':
+                return floatval($value);
+
+            case 'bool':
+                return !!$value;
+
+            case 'jsonarray':
+                return '"' . $value . '"';
+
+            default:
+                throw new \Exception("Invalid datatype " . $this->type);
         }
     }
 
@@ -266,7 +300,7 @@ class Type
                     ) . '"]';
 
             default:
-                throw new Exception("Invalid datatype " . $type);
+                throw new \Exception("Invalid datatype " . $type);
         }
     }
 
@@ -313,7 +347,7 @@ class Type
                     ) . '"]';
 
             default:
-                throw new Exception("Invalid datatype " . $type);
+                throw new \Exception("Invalid datatype " . $type);
         }
     }
 
@@ -361,7 +395,7 @@ class Type
                     ) . '"]';
 
             default:
-                throw new Exception("Invalid datatype " . $type);
+                throw new \Exception("Invalid datatype " . $type);
         }
     }
 
@@ -389,7 +423,7 @@ class Type
                     return preg_replace('!"]$!', 'abc"]', self::$testValues[$idx]);
 
                 default:
-                    throw new Exception("Invalid datatype " . $type);
+                    throw new \Exception("Invalid datatype " . $type);
             }
         }
 
@@ -425,7 +459,7 @@ class Type
                     ) . '"]';
 
             default:
-                throw new Exception("Invalid datatype " . $type);
+                throw new \Exception("Invalid datatype " . $type);
         }
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+namespace mgen;
 
 class ModelFile extends CommonFile
 {
@@ -13,7 +14,7 @@ class ModelFile extends CommonFile
 
         $content[] = "class {$this->name} \n{";
         if ($this->useCoreUtils) {
-            $content[] = S . "use \core\ToArrayTrait;";
+            $content[] = S . "use \\mgen\\ext\\ToArrayTrait;";
             $content[] = "";
         }
         $content[] = $this->buildFields();
@@ -93,18 +94,18 @@ class ModelFile extends CommonFile
         $comparison = [];
 
         foreach ($this->fields as $field => $type) {
-            $comparison[] = S.S.S."\$this->get" . ucfirst($field) . "() === \$src->get" . ucfirst($field) . "() ";
+            $comparison[] = S . S . S . "\$this->get" . ucfirst($field) . "() === \$src->get" . ucfirst($field) . "() ";
         }
         return
-                "\n" .
-                S . "public function equals(?{$this->name} \$src): bool\n" .
-                S . "{\n" .
-                S.S."if (is_null(\$src)) {\n" .
-                S.S.S."return false;\n" .
-                S.S."}\n" .
-                S.S."return\n" . join("&&\n", $comparison) . "\n" .
-                S.S.";\n" .
-                S . "}";
+            "\n" .
+            S . "public function equals(?{$this->name} \$src): bool\n" .
+            S . "{\n" .
+            S . S . "if (is_null(\$src)) {\n" .
+            S . S . S . "return false;\n" .
+            S . S . "}\n" .
+            S . S . "return\n" . join("&&\n", $comparison) . "\n" .
+            S . S . ";\n" .
+            S . "}";
     }
 
     public function getGetters()

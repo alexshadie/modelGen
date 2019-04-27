@@ -1,0 +1,21 @@
+{
+    "name": "alexshadie/model-gen",
+    "description": "Tool for model generation",
+    "type": "library",
+    "require": {
+        "php": "^7.1"
+    },
+    "authors": [
+        {
+            "name": "Alex Shadie",
+            "email": "alex@astra.ws"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload" : {
+        "psr-4" : {
+            "mgen\\": "src/",
+            "tests\\" : "tests/"
+        }
+    }
+}

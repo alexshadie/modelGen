@@ -1,5 +1,7 @@
 <?php
 
+namespace mgen;
+
 define('S', "    ");
 
 abstract class CommonFile
@@ -7,6 +9,7 @@ abstract class CommonFile
     protected $namespace;
     protected $name;
     protected $fields;
+    protected $defaults;
     protected $exports;
     protected $modelHash;
     protected $useCoreUtils;
@@ -29,6 +32,11 @@ abstract class CommonFile
     public function setFields($fields)
     {
         $this->fields = $fields;
+    }
+
+    public function setDefaults($defaults)
+    {
+        $this->defaults = $defaults;
     }
 
     public function setExports($exports)

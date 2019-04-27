@@ -1,19 +1,26 @@
 <?php
 
-include __DIR__ . "/lib/func.php";
-include __DIR__ . "/lib/Type.php";
-include __DIR__ . "/lib/CommonFile.php";
-include __DIR__ . "/lib/ModelFile.php";
-include __DIR__ . "/lib/SQLFile.php";
-include __DIR__ . "/lib/BuilderFile.php";
-include __DIR__ . "/lib/TestFile.php";
+$localDir = __DIR__;
+if (strpos($localDir, '/vendor/bin') === strlen($localDir) - 11) {
+    // Vendor directory, works as library
+    $configPath = substr($localDir, 0, strlen($localDir) - 11) . '/config';
+    $vendorPath = substr($localDir, 0, strlen($localDir) - 11) . '/vendor';
+} else {
+    $configPath = substr($localDir, 0, strlen($localDir) - 4) . '/config';
+    $vendorPath = substr($localDir, 0, strlen($localDir) - 4) . '/vendor';
+}
+
+require_once $vendorPath . '/autoload.php';
+
+if (!is_dir($configPath)) {
+    die("Config not found in {$configPath}\n");
+}
+echo "Using config from '{$configPath}'\n";
+$config = @include($configPath . '/mgen-config.php');
+$outputPath = realpath($config['path']);
 
 $model = $argv[1] ?? '';
 $out = $argv[2] ?? '';
-
-$config = @include(__DIR__ . "/config/config.php");
-
-$outputPath = realpath($config['path']);
 
 if (!$model || !preg_match('!^[A-Za-z/]+$!i', $model)) {
     die("Specify model");
@@ -32,30 +39,35 @@ if (!$position) {
 }
 $model = substr($model, $position);
 
+$namespace = $modelStructure['ns'];
+if ($config['coreNamespace'] ?? null) {
+    $namespace = $config['coreNamespace'] . "\\" . $modelStructure['ns'];
+}
 
-$mFile = new ModelFile($modelHash);
+$mFile = new \mgen\ModelFile($modelHash);
 $mFile->setName($model);
-$mFile->setNamespace($modelStructure['ns'] ?? null);
+$mFile->setNamespace($namespace ?? null);
 $mFile->setFields($modelStructure['fields']);
 $mFile->setExports($modelStructure['exports'] ?? []);
 $mFile->setUseCoreUtils($modelStructure['useCoreUtils'] ?? true);
 
-$bFile = new BuilderFile($modelHash);
+$bFile = new \mgen\BuilderFile($modelHash);
 $bFile->setName($model);
-$bFile->setNamespace($modelStructure['ns'] ?? null);
+$bFile->setNamespace($namespace ?? null);
 $bFile->setFields($modelStructure['fields']);
+$bFile->setDefaults($modelStructure['defaults'] ?? []);
 $bFile->setExports($modelStructure['exports'] ?? []);
 
 
-$sqlFile = new SQLFile($modelHash);
+$sqlFile = new \mgen\SQLFile($modelHash);
 $sqlFile->setName($model);
-$sqlFile->setNamespace($modelStructure['ns'] ?? null);
+$sqlFile->setNamespace($namespace ?? null);
 $sqlFile->setFields($modelStructure['fields']);
 $sqlFile->setExports($modelStructure['exports'] ?? []);
 
-$testFile = new TestFile($modelHash);
+$testFile = new \mgen\TestFile($modelHash);
 $testFile->setName($model);
-$testFile->setNamespace($modelStructure['ns'] ?? null);
+$testFile->setNamespace($namespace ?? null);
 $testFile->setFields($modelStructure['fields']);
 $testFile->setExports($modelStructure['exports'] ?? []);
 

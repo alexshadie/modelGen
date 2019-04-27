@@ -1,5 +1,6 @@
 <?php
 
+namespace mgen;
 
 class BuilderFile extends CommonFile
 {
@@ -31,7 +32,12 @@ class BuilderFile extends CommonFile
             $phpDoc = S . "/** \n     * @var {$t->getPhpDocType()}\n";
             $phpDoc .= S . " */";
             $phpDocs[] = $phpDoc;
-            $fields[] = S . "private \${$field};";
+            $fieldStr = S . "private \${$field}";
+            if (isset($this->defaults[$field])) {
+                $fieldStr .= " = " . $t->getQuotedValue($this->defaults[$field]);;
+            }
+            $fieldStr .= ";";
+            $fields[] = $fieldStr;
         }
 
         $result = [];
@@ -54,11 +60,11 @@ class BuilderFile extends CommonFile
         foreach ($this->fields as $field => $type) {
             $t = new Type($type);
             $fromContent[] = "        \$builder->set" . ucfirst($field) . "(\$src->get" . ucfirst($field) . "());";
-            $default = $t->getDefaultValue();
-            if (camelCaseToUnderscores($field) === $field) {
+            $default = isset($this->defaults[$field]) ? $t->getQuotedValue($this->defaults[$field]) : $t->getDefaultValue();
+            if (Helper::camelCaseToUnderscores($field) === $field) {
                 $fromArrayContent[] = "        \$builder->set" . ucfirst($field) . "(\$src[\"$field\"] ?? \$src[$idx] ?? $default);";
             } else {
-                $fromArrayContent[] = "        \$builder->set" . ucfirst($field) . "(\$src[\"" . camelCaseToUnderscores($field) . "\"] ?? \$src[\"$field\"] ?? \$src[$idx] ?? $default);";
+                $fromArrayContent[] = "        \$builder->set" . ucfirst($field) . "(\$src[\"" . Helper::camelCaseToUnderscores($field) . "\"] ?? \$src[\"$field\"] ?? \$src[$idx] ?? $default);";
             }
             $createContent[] = "            \$this->{$field}";
             $idx++;
@@ -70,7 +76,6 @@ class BuilderFile extends CommonFile
         $builderMethods[] = "        return \$builder;";
         $builderMethods[] = "    }\n";
 
-        $builderMethods = [];
         $builderMethods[] = "    public static function fromArray(array \$src): {$this->name}Builder\n    {\n        \$builder = new {$this->name}Builder();";
         $builderMethods = array_merge($builderMethods, $fromArrayContent);
         $builderMethods[] = "        return \$builder;";

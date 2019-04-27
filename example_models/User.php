@@ -1,5 +1,6 @@
 <?php
 return [
+    'type' => 'model',
     'ns' => 'auth',
     'fields' => [
         'id' => 'int',
@@ -17,4 +18,8 @@ return [
         'createdTs',
         'updatedTs',
     ],
+    'defaults' => [
+        'email' => 'a@a.a',
+        'name' => '',
+    ]
 ];

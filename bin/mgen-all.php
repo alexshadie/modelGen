@@ -1,6 +1,20 @@
 <?php
 
-$config = @include(__DIR__ . "/config/config.php");
+$localDir = __DIR__;
+if (strpos($localDir, '/vendor/bin') === strlen($localDir) - 11) {
+    // Vendor directory, works as library
+    $configPath = substr($localDir, 0, strlen($localDir) - 11) . '/config';
+} else {
+    $configPath = substr($localDir, 0, strlen($localDir) - 4) . '/config';
+}
+
+if (!is_dir($configPath)) {
+    die("Config not found in {$configPath}\n");
+}
+
+echo "Using config from '{$configPath}'\n";
+
+$config = @include($configPath . '/mgen-config.php');
 
 $modelPath = realpath($config['modelpath']);
 
@@ -25,5 +39,5 @@ foreach (collectAllModels($modelPath) as $item) {
     $item = str_replace($modelPath . "/", "", $item);
     $item = str_replace(".php", "", $item);
 
-    passthru("php run.php {$item} 1");
+    passthru("php " . __DIR__ . "/mgen-model.php {$item} 1");
 }
