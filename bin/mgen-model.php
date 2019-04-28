@@ -105,12 +105,13 @@ switch ($modelStructure['type']) {
 
         $repositoryFile = new \mgen\RepositoryFile($modelHash);
         $repositoryFile->setName($model);
+        $repositoryFile->setNamespace($namespace ?? null);
 
         $repositoryTestFile = '';
 
         $serviceFile = new \mgen\ServiceFile($modelHash);;
         $serviceFile->setName($model);
-
+        $serviceFile->setNamespace($namespace ?? null);
 
         $serviceTestFile = '';
 
