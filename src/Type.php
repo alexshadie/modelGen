@@ -399,6 +399,73 @@ class Type
         }
     }
 
+    public static function getTestValueJson($type, $idx, $valueType)
+    {
+        $t = new Type($type);
+        if (isset(self::$testValues[$idx])) {
+            if ($type != 'jsonarray') {
+                return self::$testValues[$idx];
+            }
+            $value = self::$testValues[$idx];
+            switch ($valueType) {
+                case 'json': return "/*1*/\"[\\\"$value\\\"]\""; // Json string
+                case 'string': return "/*2*/\"$value\""; // Simple string
+//                case 'empty': return self::$testValues[$idx]; // Empty value
+                case 'array': return "/*3*/[\"$value\"]"; // Array
+                case 'empty': return "\"\"";
+                case 'emptyarray': return "[]";
+                case 'emptyjson': return "\"[]\"";
+            }
+            throw new \Exception("Invalid value type " . $valueType);
+        }
+
+
+        switch ($t->type) {
+            case 'int':
+                return self::$testValues[$idx] = rand(1, 100);
+
+            case 'timestamp':
+                return self::$testValues[$idx] = 30000000 + rand(1, 1000) * 10;
+
+            case 'string':
+                return self::$testValues[$idx] = '"' . substr(
+                        str_shuffle(
+                            str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
+                        ),
+                        1,
+                        16
+                    ) . '"';
+
+            case 'float':
+                return self::$testValues[$idx] = rand(1, 100) + 0.5;
+
+            case 'bool':
+                return self::$testValues[$idx] = (rand(1, 100) > 50) ? 'true' : 'false';
+
+            case 'jsonarray':
+                $value = substr(
+                    str_shuffle(
+                        str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyz', 10 * ceil(16 / strlen($x)))
+                    ),
+                    1,
+                    16
+                );
+
+                self::$testValues[$idx] = $value;
+
+                switch ($valueType) {
+                    case 'json': return "\"[\\\"$value\\\"]\""; // Json string
+                    case 'string': return "\"$value\""; // Simple string
+                    case 'empty': self::$testValues[$idx] = ""; return "\"\""; // Empty value
+                    case 'array': return "[\"$value\"]"; // Array
+                }
+                throw new \Exception("Invalid value type " . $valueType);
+
+            default:
+                throw new \Exception("Invalid datatype " . $type);
+        }
+    }
+
     public static function getTestValueIncremented($type, $idx)
     {
         $t = new Type($type);

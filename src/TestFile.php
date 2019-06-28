@@ -27,12 +27,17 @@ class TestFile extends CommonFile
     {
         $null = false;
         $ts = false;
+        $jsonarray = false;
 
         foreach ($this->fields as $field => $type) {
             $t = new Type($type);
             if ($type === 'timestamp') {
                 $ts = true;
             }
+            if ($type === 'jsonarray') {
+                $jsonarray = true;
+            }
+
             if ($t->isNullable()) {
                 $null = true;
             }
@@ -329,6 +334,131 @@ class TestFile extends CommonFile
             $test[] = S . S . S . "->create();";
 
             $test[] = join("\n", $test7Assert) . "\n";
+
+            $test[] = S . "}";
+        }
+
+        // With JSONArray
+
+        if ($jsonarray) {
+            $test1Init = [];
+            $test1Assert = [];
+            $test2Init = [];
+            $test2Assert = [];
+            $test3Init = [];
+            $test3Assert = [];
+            $test4Init = [];
+            $test4Assert = [];
+            $test5Init = [];
+            $test5Assert = [];
+            $test6Init = [];
+            $test6Assert = [];
+            $test7Init = [];
+            $test7Assert = [];
+            $test8Init = [];
+            $test8Assert = [];
+            $idx = 0;
+
+            $test[] = "";
+            $test[] = S . "public function testCreateJsonarray()";
+            $test[] = S . "{";
+
+            Type::resetTestValues();
+            foreach ($this->fields as $field => $type) {
+                $test1Init[] = S . S . S . Type::getTestValueJson($type, $field . "1", 'json');
+                $test1Assert[] = S . S . "/*11*/\$this->assertEquals(" . Type::getTestValueJson($type, $field . "1", 'array') . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'jsonarray' || $type == '?jsonarray') {
+                    $test1Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "1", 'json') . ", \$m->get" . ucfirst($field) . "Json());";
+                }
+                $test2Init[] = S . S . S . Type::getTestValueJson($type, $field . "2", 'string');
+                $test2Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "2", 'array') . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'jsonarray' || $type == '?jsonarray') {
+                    $test2Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "2", 'json') . ", \$m->get" . ucfirst($field) . "Json());";
+                }
+                $test3Init[] = S . S . S . Type::getTestValueJson($type, $field . "3", 'array');
+                $test3Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "3", 'array') . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'jsonarray' || $type == '?jsonarray') {
+                    $test3Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "3", 'json') . ", \$m->get" . ucfirst($field) . "Json());";
+                }
+                $test4Init[] = S . S . S . Type::getTestValueJson($type, $field . "4", 'empty');
+                $test4Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "4", 'emptyarray') . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'jsonarray' || $type == '?jsonarray') {
+                    $test4Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "4", 'emptyjson') . ", \$m->get" . ucfirst($field) . "Json());";
+                }
+
+
+                $test5Init[] = S . S . S . "->set" . ucfirst($field) . "(" . Type::getTestValueJson($type, $field . "5", 'json') . ")";
+                $test5Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "5", 'array') . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'jsonarray' || $type == '?jsonarray') {
+                    $test5Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "5", 'json') . ", \$m->get" . ucfirst($field) . "Json());";
+                }
+                $test6Init[] = S . S . S . "->set" . ucfirst($field) . "(" . Type::getTestValueJson($type, $field . "6", 'string') . ")";
+                $test6Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "6", 'array') . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'jsonarray' || $type == '?jsonarray') {
+                    $test6Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "6", 'json') . ", \$m->get" . ucfirst($field) . "Json());";
+                }
+                $test7Init[] = S . S . S . "->set" . ucfirst($field) . "(" . Type::getTestValueJson($type, $field . "7", 'array') . ")";
+                $test7Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "7", 'array') . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'jsonarray' || $type == '?jsonarray') {
+                    $test7Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "7", 'json') . ", \$m->get" . ucfirst($field) . "Json());";
+                }
+                $test8Init[] = S . S . S . "->set" . ucfirst($field) . "(" . Type::getTestValueJson($type, $field . "8", 'empty') . ")";
+                $test8Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "8", 'emptyarray') . ", \$m->get" . ucfirst($field) . "());";
+                if ($type == 'jsonarray' || $type == '?jsonarray') {
+                    $test8Assert[] = S . S . "\$this->assertEquals(" . Type::getTestValueJson($type, $field . "8", 'emptyjson') . ", \$m->get" . ucfirst($field) . "Json());";
+                }
+                $idx++;
+            }
+
+            $test[] = S . S . "\$m = new {$this->name}(";
+            $test[] = join(",\n", $test1Init);
+            $test[] = S . S . ");\n";
+
+            $test[] = join("\n", $test1Assert) . "\n";
+
+            $test[] = S . S . "\$m = new {$this->name}(";
+            $test[] = join(",\n", $test2Init);
+            $test[] = S . S . ");\n";
+
+            $test[] = join("\n", $test2Assert) . "\n";
+
+            $test[] = S . S . "\$m = new {$this->name}(";
+            $test[] = join(",\n", $test3Init);
+            $test[] = S . S . ");\n";
+
+            $test[] = join("\n", $test3Assert) . "\n";
+
+            $test[] = S . S . "\$m = new {$this->name}(";
+            $test[] = join(",\n", $test4Init);
+            $test[] = S . S . ");\n";
+
+            $test[] = join("\n", $test4Assert) . "\n";
+
+            $test[] = S . S . "/* Test with builder */";
+            $test[] = S . S . "\$m = (new {$this->name}Builder())";
+            $test[] = join("\n", $test5Init);
+            $test[] = S . S . S . "->create();\n";
+
+            $test[] = join("\n", $test5Assert) . "\n";
+
+            $test[] = S . S . "\$m = (new {$this->name}Builder())";
+            $test[] = join("\n", $test6Init);
+            $test[] = S . S . S . "->create();\n";
+
+            $test[] = join("\n", $test6Assert) . "\n";
+
+            $test[] = S . S . "\$m = (new {$this->name}Builder())";
+            $test[] = join("\n", $test7Init);
+            $test[] = S . S . S . "->create();\n";
+
+            $test[] = join("\n", $test7Assert) . "\n";
+
+            $test[] = S . S . "\$m = (new {$this->name}Builder())";
+            $test[] = join("\n", $test8Init);
+            $test[] = S . S . S . "->create();\n";
+
+            $test[] = join("\n", $test8Assert) . "\n";
+
 
             $test[] = S . "}";
         }
