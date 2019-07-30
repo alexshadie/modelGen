@@ -22,4 +22,12 @@ trait ToArrayTrait
         }
         return $result;
     }
+
+    public function serialize(): string
+    {
+        return json_encode([
+            'class' => get_class($this),
+            'data' => $this->toArray(),
+        ]);
+    }
 }

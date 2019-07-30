@@ -26,4 +26,24 @@ class Utils
         }
         return date('Y-m-d H:i:s', $ts);
     }
+
+    public static function unserialize($serialized)
+    {
+        $serialized = json_decode($serialized, 1);
+        $reflection = new \ReflectionClass($serialized['class']);
+
+        $builder = $serialized['class'] . 'Builder';
+        $builder = new $builder;
+
+        $props = $reflection->getProperties();
+
+        foreach ($props as $prop) {
+            if (strpos(str_replace("\n", " ", $prop->getDocComment()), '@@export')) {
+                $method = 'set' . ucfirst($prop->getName());
+                $builder->$method($serialized['data'][$prop->getName()]);
+            }
+        }
+
+        return $builder->create();
+    }
 }
