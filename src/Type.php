@@ -123,7 +123,7 @@ class Type
             $s .= S . S . S . "\$this->{$field} = [];\n";
             $s .= S . S . "} elseif (is_array(\${$field})) {\n";
             $s .= S . S . S . "\$this->{$field} = \${$field};\n";
-            $s .= S . S . "} elseif (json_decode(\${$field})) {\n";
+            $s .= S . S . "} elseif (json_decode(\${$field}) !== false) {\n";
             $s .= S . S . S . "\$this->{$field} = json_decode(\${$field}, true);\n";
             $s .= S . S . "} else {\n";
             $s .= S . S . S . "\$this->{$field} = [\${$field}];\n";
@@ -151,7 +151,7 @@ class Type
             $s .= S . S . S . "\$this->{$field} = [];\n";
             $s .= S . S . "} elseif (is_array(\${$field})) {\n";
             $s .= S . S . S . "\$this->{$field} = \${$field};\n";
-            $s .= S . S . "} elseif (json_decode(\${$field})) {\n";
+            $s .= S . S . "} elseif (json_decode(\${$field}) !== false) {\n";
             $s .= S . S . S . "\$this->{$field} = json_decode(\${$field}, true);\n";
             $s .= S . S . "} else {\n";
             $s .= S . S . S . "\$this->{$field} = [\${$field}];\n";
