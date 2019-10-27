@@ -469,7 +469,7 @@ class TestFile extends CommonFile
         foreach ($this->fields as $field => $type) {
             $t = new Type($type);
             $phpDoc = S . "/** \n     * @var {$t->getPhpDocType()}\n";
-            if (in_array($field, $this->exports)) {
+            if (!$this->exports || in_array($field, $this->exports)) {
                 $phpDoc .= S . " * @@export\n";
             }
             $phpDoc .= S . " */";
